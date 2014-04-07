@@ -20,14 +20,21 @@
                 <Border Padding="10"
                         Background="{StaticResource TransBack}"
                         CornerRadius="2">
-                <StackPanel >
-                    <TextBox  Width="200" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,3"/>
-                    <TextBox Width="200" Margin="0,3" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                    <Button Command="{Binding RemoveCommad}" CommandParameter="{Binding ElementName=canv}">Remove</Button>
-                </StackPanel>
+                    <StackPanel >
+                        <TextBox  Width="200" IsEnabled="{Binding ElementName=editBtn, Path=IsChecked, UpdateSourceTrigger=PropertyChanged}" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,3"/>
+                        <TextBox Width="200" Margin="0,3" IsEnabled="{Binding ElementName=editBtn, Path=IsChecked, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <ToggleButton x:Name="editBtn">Ändra</ToggleButton>
+                            <Button Command="{Binding RemoveCommad}" CommandParameter="{Binding ElementName=canv}" Grid.Column="1">Ta bort</Button>
+                        </Grid>
+                    </StackPanel>
                 </Border>
             </Popup>
         </Canvas>
-       
+
     </Grid>
 </Page>

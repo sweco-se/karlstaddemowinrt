@@ -35,20 +35,28 @@ namespace App1
 
         private void Image_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            var point = e.GetPosition(canv);
-            var el = new Ellipse
+            var popup = (Popup)canv.Children.FirstOrDefault(c => c is Popup);
+            if (!popup.IsOpen)
             {
-                Width = 25,
-                Height = 25,
-                Stroke = new SolidColorBrush(Colors.Pink),
-                StrokeThickness = 1,
-                Fill = new SolidColorBrush(Colors.Green),
-                DataContext = new Opinion { Title = "Test", Description="Beskrivnign"}
-            };
-            el.Tapped += el_Tapped;
-            canv.Children.Add(el);
-            el.SetValue(Canvas.LeftProperty, point.X -12.5);
-            el.SetValue(Canvas.TopProperty, point.Y - 12.5);
+                var point = e.GetPosition(canv);
+                var el = new Ellipse
+                {
+                    Width = 25,
+                    Height = 25,
+                    Stroke = new SolidColorBrush(Colors.Pink),
+                    StrokeThickness = 1,
+                    Fill = new SolidColorBrush(Colors.Green),
+                    DataContext = new Opinion { Title = "Test", Description = "Beskrivnign" }
+                };
+                el.Tapped += el_Tapped;
+                canv.Children.Add(el);
+                el.SetValue(Canvas.LeftProperty, point.X - 12.5);
+                el.SetValue(Canvas.TopProperty, point.Y - 12.5);
+            }
+            else
+            {
+                popup.IsOpen = false;
+            }
         }
 
         void el_Tapped(object sender, TappedRoutedEventArgs e)
