@@ -9,13 +9,17 @@
     <Page.Resources>
         <SolidColorBrush x:Key="TransBack" Color="Black" Opacity="0.2" />
     </Page.Resources>
+    <Page.DataContext>
+        <local:ImageViewModel />
+    </Page.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Canvas x:Name="canv">
-            <Image x:Name="tapimage" Source="Assets/wallpaper-711691.jpg" Tapped="Image_Tapped" Width="{Binding ElementName=canv, Path=ActualWidth}" Height="{Binding ElementName=canv, Path=ActualHeight}"/>
+            <!--Source="Assets/wallpaper-711691.jpg" -->
+            <Image x:Name="tapimage" Source="{Binding ImageSource}"  Tapped="Image_Tapped" Width="{Binding ElementName=canv, Path=ActualWidth}" Height="{Binding ElementName=canv, Path=ActualHeight}"/>
             <Popup x:Name="create" Canvas.Left="10" Canvas.Top="60">
                 <Border Padding="10"
                         Background="{StaticResource TransBack}"
@@ -29,12 +33,20 @@
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
                             <ToggleButton x:Name="editBtn">Ändra</ToggleButton>
-                            <Button Command="{Binding RemoveCommad}" CommandParameter="{Binding ElementName=canv}" Grid.Column="1">Ta bort</Button>
+                            <Button Command="{Binding RemoveCommad}" CommandParameter="{Binding Id}" Grid.Column="1">Ta bort</Button>
                         </Grid>
                     </StackPanel>
                 </Border>
             </Popup>
         </Canvas>
-
     </Grid>
+    <Page.BottomAppBar>
+        <AppBar IsOpen="True" IsSticky="True">
+            <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,0">
+                <Button x:Name="saveBtn" VerticalAlignment="Center" Command="{Binding SaveCommad}">
+                    Spara
+                </Button>
+            </StackPanel>
+        </AppBar>
+    </Page.BottomAppBar>
 </Page>

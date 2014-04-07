@@ -2,6 +2,8 @@
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -28,9 +30,98 @@ namespace App1
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        #region AddCommand
+
+        public ICommand AddCommad
+        {
+            get { return (ICommand)GetValue(AddCommadProperty); }
+            set { SetValue(AddCommadProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for AddCommad.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty AddCommadProperty =
+            DependencyProperty.Register("AddCommad", typeof(ICommand), typeof(MainPage), new PropertyMetadata(null));
+        
+        #endregion AddCommand
+
+        #region Opinitions
+
+        private static NotifyCollectionChangedEventHandler CollectionChangedHandler;
+        
+        public ObservableCollection<Opinion> OpionCollection
+        {
+            get { return (ObservableCollection<Opinion>)GetValue(OpionCollectionProperty); }
+            set { SetValue(OpionCollectionProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for OpionCollection.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty OpionCollectionProperty =
+            DependencyProperty.Register("OpionCollection", typeof(ObservableCollection<Opinion>), typeof(MainPage), new PropertyMetadata(null, OnOpionCollectionChanged));
+
+
+        private static void OnOpionCollectionChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var page = (MainPage)sender;
+            if (CollectionChangedHandler == null)
+            {
+                CollectionChangedHandler = (a, b) => {
+                    switch (b.Action)
+                    {
+                        case NotifyCollectionChangedAction.Add:
+                            foreach (Opinion opinion in b.NewItems)
+                            {
+                                var el = new Ellipse
+                                {
+                                    Width = 25,
+                                    Height = 25,
+                                    Stroke = new SolidColorBrush(Colors.Pink),
+                                    StrokeThickness = 1,
+                                    Fill = new SolidColorBrush(Colors.Green),
+                                    DataContext = opinion
+                                };
+                                el.Tapped += page.el_Tapped;
+                                page.canv.Children.Add(el);
+                                el.SetValue(Canvas.LeftProperty, opinion.X - 12.5);
+                                el.SetValue(Canvas.TopProperty, opinion.Y - 12.5);
+                            }
+                            break;
+                        case NotifyCollectionChangedAction.Remove:
+                            foreach (Opinion opinion in b.OldItems)
+                            {
+                                var ellipse = page.canv.Children.FirstOrDefault(c => c is Ellipse && ((Opinion)((Ellipse)c).DataContext).Id == opinion.Id);
+                                var popup = (Popup)page.canv.Children.FirstOrDefault(c => c is Popup);
+                                page.canv.Children.Remove(ellipse);
+                                popup.IsOpen = false;
+                            }
+                            break;
+                    }
+            
+                };
+            }
+
+            if (e.OldValue != null)
+                ((INotifyCollectionChanged)e.OldValue).CollectionChanged += CollectionChangedHandler;
+            ((INotifyCollectionChanged)e.NewValue).CollectionChanged += CollectionChangedHandler;
+        }
+
+        #endregion Opinitions
+
         public MainPage()
         {
             this.InitializeComponent();
+
+            SetBinding(AddCommadProperty, new Binding
+            {
+                Path = new PropertyPath("AddCommand"),
+                Mode = BindingMode.OneWay
+            });
+
+            SetBinding(OpionCollectionProperty, new Binding
+            {
+                Path = new PropertyPath("Opinions"),
+                Mode = BindingMode.OneWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            });
         }
 
         private void Image_Tapped(object sender, TappedRoutedEventArgs e)
@@ -39,19 +130,8 @@ namespace App1
             if (!popup.IsOpen)
             {
                 var point = e.GetPosition(canv);
-                var el = new Ellipse
-                {
-                    Width = 25,
-                    Height = 25,
-                    Stroke = new SolidColorBrush(Colors.Pink),
-                    StrokeThickness = 1,
-                    Fill = new SolidColorBrush(Colors.Green),
-                    DataContext = new Opinion { Title = "Test", Description = "Beskrivnign" }
-                };
-                el.Tapped += el_Tapped;
-                canv.Children.Add(el);
-                el.SetValue(Canvas.LeftProperty, point.X - 12.5);
-                el.SetValue(Canvas.TopProperty, point.Y - 12.5);
+                if (AddCommad.CanExecute(point))
+                    AddCommad.Execute(point);
             }
             else
             {
@@ -59,7 +139,7 @@ namespace App1
             }
         }
 
-        void el_Tapped(object sender, TappedRoutedEventArgs e)
+        private void el_Tapped(object sender, TappedRoutedEventArgs e)
         {
             e.Handled = true;
             var fe = ((FrameworkElement)sender);
@@ -67,47 +147,6 @@ namespace App1
             create.SetValue(Canvas.LeftProperty, fe.GetValue(Canvas.LeftProperty));
             create.SetValue(Canvas.TopProperty, fe.GetValue(Canvas.TopProperty));
             create.IsOpen = true;
-        }
-    }
-
-    public class Opinion 
-        : ViewModelBase
-    {
-        public Guid Id { get; set; }
-        
-        private string _title;
-        
-        public string Title
-        {
-            get { return _title; }
-            set { _title = value; RaisePropertyChanged("Title"); }
-        }
-
-        private string _desc;
-
-        public string Description
-        {
-            get { return _desc; }
-            set { _desc = value; RaisePropertyChanged("Description"); }
-        }
-
-        public ICommand RemoveCommad 
-        {
-            get 
-            {
-                return new RelayCommand<Canvas>((canvas) => {
-                    var ellipse = canvas.Children.FirstOrDefault(c => c is Ellipse && ((Opinion)((Ellipse)c).DataContext).Id == Id);
-                    var popup = (Popup)canvas.Children.FirstOrDefault(c => c is Popup);
-                    canvas.Children.Remove(ellipse);
-                    popup.IsOpen = false;
-                }); 
-            }
-        }
-
-
-        public Opinion()
-        {
-            Id = Guid.NewGuid();
         }
     }
 }
