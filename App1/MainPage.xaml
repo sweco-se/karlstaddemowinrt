@@ -1,0 +1,33 @@
+﻿<Page
+    x:Class="App1.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:App1"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <SolidColorBrush x:Key="TransBack" Color="Black" Opacity="0.2" />
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Canvas x:Name="canv">
+            <Image x:Name="tapimage" Source="Assets/wallpaper-711691.jpg" Tapped="Image_Tapped" Width="{Binding ElementName=canv, Path=ActualWidth}" Height="{Binding ElementName=canv, Path=ActualHeight}"/>
+            <Popup x:Name="create" Canvas.Left="10" Canvas.Top="60">
+                <Border Padding="10"
+                        Background="{StaticResource TransBack}"
+                        CornerRadius="2">
+                <StackPanel >
+                    <TextBox  Width="200" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,3"/>
+                    <TextBox Width="200" Margin="0,3" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                    <Button Command="{Binding RemoveCommad}" CommandParameter="{Binding ElementName=canv}">Remove</Button>
+                </StackPanel>
+                </Border>
+            </Popup>
+        </Canvas>
+       
+    </Grid>
+</Page>
